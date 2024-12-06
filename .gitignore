@@ -15,3 +15,5 @@ static/
 logs/
 *.log
 *.sh
+celerybeat-schedule
+*.env
