@@ -49,7 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    two_factor_enabled = models.BooleanField(default=True)
+    two_factor_enabled = models.BooleanField(default=False)
 
     # Дополнительный поля, необходимые Django
     # при указании кастомной модели пользователя.

@@ -1,3 +1,5 @@
 from .two_FA_auth import (
-    user_login, two_factor_verify, toggle_two_factor, dashboard
+    register_view,login_view, logout_view, 
+    two_factor_verify, toggle_two_factor, 
+    dashboard
 )
