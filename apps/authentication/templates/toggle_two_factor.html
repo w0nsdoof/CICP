@@ -1,0 +1,21 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Toggle 2FA Authentication</title>
+  </head>
+  <body>
+    <h1>Two-Factor Authentication</h1>
+    <p>
+      2FA authentication is currently
+      <strong>
+        {% if two_factor_enabled %} Enabled {% else %} Disabled {% endif %} </strong
+      >.
+    </p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit">
+        {% if two_factor_enabled %} Disable {% else %} Enable {% endif %}
+      </button>
+    </form>
+  </body>
+</html>

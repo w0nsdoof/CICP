@@ -52,7 +52,9 @@ def two_factor_verify(request):
             # Check if OTP is expired
             if otp.is_expired():
                 otp.delete()
-                return render(request, 'two_factor_verify.html', {'error': 'The code has expired. Please log in again.'})
+                return render(request, 'two_factor_verify.html', {
+                    'error': 'The code has expired. Please log in again.'
+                })
 
             # Check if OTP code matches
             if otp.code == code:
@@ -62,6 +64,21 @@ def two_factor_verify(request):
             else:
                 return render(request, 'two_factor_verify.html', {'error': 'Invalid code'})
         except OTP.DoesNotExist:
-            return render(request, 'two_factor_verify.html', {'error': 'No OTP found. Please log in again.'})
+            return render(request, 'two_factor_verify.html', {
+                'error': 'No OTP found. Please log in again.'
+            })
 
     return render(request, 'two_factor_verify.html')
+
+@login_required
+def toggle_two_factor(request):
+    if request.method == "POST":
+        # Toggle the `two_factor_enabled` field
+        request.user.two_factor_enabled = not request.user.two_factor_enabled
+        request.user.save()
+        return redirect('authentication:toggle_two_factor')  
+
+    # Render the template with the current state of `two_factor_enabled`
+    return render(request, 'toggle_two_factor.html', {
+        'two_factor_enabled': request.user.two_factor_enabled
+    })
