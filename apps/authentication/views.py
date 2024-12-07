@@ -1,19 +1,21 @@
-import random,datetime
+import random, string
 
-from django.shortcuts import get_object_or_404
 from django.core.mail import send_mail
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
 
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 
+from .models import User
 from .security import create_token, decrypt_token
 from .serializers import (
     LoginSerializer, RegisterUserSerializer,
-    ForgotPasswordSerializer,CheckOTPSerializer
+    ForgotPasswordSerializer,ResetPasswordSerializer
 )
 
 class LoginView(GenericAPIView):
@@ -45,60 +47,64 @@ class RegisterUserView(GenericAPIView):
 
 class ForgetPasswordView(GenericAPIView):
     serializer_class = ForgotPasswordSerializer
+
     def post(self, request, *args, **kwargs):
-        serilaizer = self.serializer_class(data=request.data)
-        serilaizer.is_valid(raise_exception=True)
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        email = serilaizer.validated_data['email']
-        user = get_object_or_404(User, email=email)
-        otp = str(random.randint(100000, 999999))
-        print(otp) # TODO: dont leave it
-        payload = {
-            'user_id': user.id,
-            'email': user.email,
-            'otp': otp,
-            'exp': datetime.datetime.now() + datetime.timedelta(minutes=10)
-        }
-        token = create_token(payload)
+        email = serializer.validated_data['email']
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({
+                'error': 'No user found with this email.'
+            }, status=status.HTTP_404_NOT_FOUND)
 
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+
+        reset_link = f"{request.scheme}://{request.get_host()}/auth/reset_password/{uid}/{token}"
         send_mail(
-            'OTP for Forget Password',
-            f'Your Otp is {otp}',
+            'Password Reset',
+            f"Use this link to reset your password: {reset_link}",
             settings.EMAIL_HOST_USER,
             [user.email],
         )
-        
-        return Response({ 'token': token }, status=200)
-        
-class CheckOTPView(GenericAPIView):
-    serializer_class = CheckOTPSerializer
-    def post(self, request, *args, **kwargs):
-        serialzier = self.serializer_class(data=request.data)
-        serialzier.is_valid(raise_exception=True)
+        return Response({'message': 'Password reset email sent.'}, status=status.HTTP_200_OK)
 
-        otp = serialzier.validated_data['otp']
-        enc_token = serialzier.validated_data['token']
 
-        data = decrypt_token(enc_token)
-        if data['status']:
-            otp_real = data['payload']['otp']
-            if otp == otp_real:
-                email = data['payload']['email']
-                user = User.objects.get(email=email)
-                access_token = str(RefreshToken.for_user(user).access_token)
+class ResetPasswordView(GenericAPIView):
+    serializer_class = ResetPasswordSerializer
 
-                return Response(
-                    {
-                        'access_token': access_token,
-                        'status': True,
-                    }, status=status.HTTP_200_OK)
-            else:
-                return Response({
-                    'message': 'OTP didnt matched....'
-                }, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, uid, token, *args, **kwargs):
+        try:
+            user_id = force_str(urlsafe_base64_decode(uid))
+            user = User.objects.get(pk=user_id)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return Response({'error': 'Invalid token or user ID.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        else:
-            return Response({
-                'message': 'OTP expired...Try Again!!',
-                'status': False
-            }, status=status.HTTP_400_BAD_REQUEST)
+        if not default_token_generator.check_token(user, token):
+            return Response({'error': 'Token is invalid or expired.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        # Reset password
+        new_password = serializer.validated_data.get('password')
+        if new_password == "GENERATE_RANDOM":
+            new_password = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+
+        user.set_password(new_password)
+        user.save()
+
+        # Send the new password to the user (if generated)
+        if "GENERATE_RANDOM" in request.data.values():
+            send_mail(
+                'New Password',
+                f"Your new password is: {new_password}",
+                settings.EMAIL_HOST_USER,
+                [user.email],
+            )
+
+        return Response({
+            'message': 'Password reset successful.'
+        }, status=status.HTTP_200_OK)

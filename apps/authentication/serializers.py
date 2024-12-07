@@ -45,3 +45,12 @@ class ForgotPasswordSerializer(serializers.Serializer):
 class CheckOTPSerializer(serializers.Serializer):
     otp = serializers.CharField(max_length=6)
     token = serializers.CharField()
+
+class ResetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(required=False, write_only=True)
+
+    def validate(self, data):
+        password = data.get('password')
+        if not password and password != "GENERATE_RANDOM":
+            raise serializers.ValidationError("Password is required or use 'GENERATE_RANDOM' to generate one.")
+        return data
