@@ -2,6 +2,8 @@ from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
+from django.views.decorators.cache import cache_page
+
 from .models import News, Tag
 from .serializers import NewsSerializer, TagSerializer
 
@@ -10,6 +12,7 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_size_query_param = 'page_size'  
     max_page_size = 100  
 
+@cache_page(60 * 10) # 10 min
 class NewsViewSet(viewsets.ModelViewSet):
     queryset = News.objects.all()
     serializer_class = NewsSerializer
@@ -53,6 +56,7 @@ class NewsViewSet(viewsets.ModelViewSet):
         
         return queryset.order_by('-created_at')
 
+@cache_page(60 * 10)
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
