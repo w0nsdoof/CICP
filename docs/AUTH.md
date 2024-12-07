@@ -34,10 +34,9 @@ POST /auth/register/
 
 ```json
 {
-  "email": "newuser@example.com",
+  "email": "new_example@example.com",
   "password": "strongpassword",
-  "username": "optional_username"
-  // other required user fields
+  "username": "example"
 }
 ```
 
@@ -45,11 +44,11 @@ POST /auth/register/
 
 ```json
 {
-  "message": "User registered successfully!",
-  "user": {
-    "email": "newuser@example.com"
-    // other user details
-  }
+    "message": "User registered successfully!",
+    "user": {
+        "username": "example",
+        "email": "new_example@example.com"
+    }
 }
 ```
 
@@ -71,7 +70,7 @@ POST /auth/forgot_password/
 
 ```json
 {
-  "message": "Password reset email sent."
+  "message": "URL for password reset sent via email."
 }
 ```
 
@@ -87,10 +86,17 @@ POST /auth/reset_password/{uid}/{token}/
 {
   "password": "newpassword"
 }
+
 ```
 
-Or use "GENERATE_RANDOM" to auto-generate a password that would be sent to email
+or generate random with password sent to email
 
+```json
+{
+  "password": "GENERATE_RANDOM"
+}
+
+```
 ### Response
 
 ```json

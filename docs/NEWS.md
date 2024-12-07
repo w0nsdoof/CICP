@@ -18,17 +18,13 @@ GET /api/news/
 #### Example Requests:
 
 ```
-# Get first page of news
 GET /api/news/
 
-# Get second page with 20 items
 GET /api/news/?page=2&page_size=20
 
-# Filter by author
 GET /api/news/?author=johndoe
 GET /api/news/?author=5
 
-# Search articles
 GET /api/news/?search=technology
 ```
 
@@ -45,15 +41,15 @@ POST /api/news/
 {
   "title": "Breaking News Title",
   "content": "Full article content",
-  "summary": "Optional brief summary",
-  "tags": [1, 2] // Optional tag IDs
+  "summary": "Optional brief summary", // Optional
+  "tags": [1, 2] // Optional 
 }
 ```
 
 ### 3. Retrieve a Specific News Article
 
 ```
-GET /api/news/{slug}/
+GET /api/news/{id}/
 ```
 
 - Returns detailed information about a specific news article
@@ -61,7 +57,7 @@ GET /api/news/{slug}/
 ### 4. Update a News Article
 
 ```
-PUT/PATCH /api/news/{slug}/
+PUT/PATCH /api/news/{id}/
 ```
 
 - Requires authentication
@@ -77,19 +73,11 @@ PUT/PATCH /api/news/{slug}/
 ### 5. Delete a News Article
 
 ```
-DELETE /api/news/{slug}/
+DELETE /api/news/{id}/
 ```
 
 - Requires authentication
 - Permanently removes the news article
-
-### 6. Publish a News Article (Custom Action)
-
-```
-POST /api/news/{slug}/publish/
-```
-
-- Custom endpoint to publish a news article
 
 ## Tags Endpoints
 
@@ -107,8 +95,6 @@ GET /api/tags/
 POST /api/tags/
 ```
 
-- Requires admin privileges
-
 ```json
 {
   "name": "Technology",
@@ -121,57 +107,7 @@ POST /api/tags/
 ```
 GET /api/tags/{id}/
 ```
-
-- Returns details of a specific tag
-
-### 4. Update a Tag
-
-```
-PUT/PATCH /api/tags/{id}/
-```
-
-- Requires admin privileges
-
-```json
-{
-  "description": "Updated tag description"
-}
-```
-
-### 5. Delete a Tag
-
-```
-DELETE /api/tags/{id}/
-```
-
-- Requires admin privileges
-
-## Authentication
-
-### Token-based Authentication
-
-Include the authentication token in the header:
-
-```
-Authorization: Token your_token_here
-```
-
-### Example Workflow
-
-1. Authenticate user
-2. Create tags
-3. Create news articles with tags
-4. Retrieve and update articles
-
-## Error Handling
-
-- 400: Bad Request
-- 401: Unauthorized
-- 403: Forbidden
-- 404: Not Found
-- 500: Server Error
-
-## Response Format
+- Response Format
 
 ```json
 {
@@ -186,4 +122,22 @@ Authorization: Token your_token_here
   "created_at": "2024-01-01T12:00:00Z",
   "updated_at": "2024-01-02T14:30:00Z"
 }
+```
+
+### 4. Update a Tag
+
+```
+PUT/PATCH /api/tags/{id}/
+```
+
+```json
+{
+  "description": "Updated tag description"
+}
+```
+
+### 5. Delete a Tag
+
+```
+DELETE /api/tags/{id}/
 ```
