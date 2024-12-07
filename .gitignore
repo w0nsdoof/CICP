@@ -1,0 +1,19 @@
+# created by virtualenv automatically
+lib/
+bin/
+pyvenv.cfg
+
+# Compiler junk
+__pycache__/
+
+# Static Files
+static/
+
+# DB: SQLite
+*.sqlite3
+
+logs/
+*.log
+*.sh
+celerybeat-schedule
+*.env
