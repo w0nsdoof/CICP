@@ -5,6 +5,4 @@ from .views import GroupSpaceViewSet
 router = DefaultRouter()
 router.register(r'groups', GroupSpaceViewSet, basename='news')
 
-urlpatterns = [
-    path('', include(router.urls)),
-]
+urlpatterns = router.urls

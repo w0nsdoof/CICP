@@ -6,6 +6,4 @@ router = DefaultRouter()
 router.register(r'news', NewsViewSet, basename='news')
 router.register(r'tags', TagViewSet, basename='tag')
 
-urlpatterns = [
-    path('', include(router.urls)),
-]
+urlpatterns = router.urls
