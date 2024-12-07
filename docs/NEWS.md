@@ -1,100 +1,214 @@
 # News API Usage Guide
 
+This API allows users to manage news articles, including creating, retrieving, updating, and deleting them. It also provides endpoints to manage associated tags.
+
+---
+
+## Features
+- List all news articles with optional filters
+- Create, update, and delete news articles (requires authentication)
+- Manage tags for categorizing articles
+
+---
+
 ## News Endpoints
 
-### 1. List All News Articles
+### 1. **List All News Articles**
+Retrieve a paginated list of news articles.
 
+**Endpoint:**
 ```
 GET /api/news/
 ```
 
-- Returns a paginated list of all news articles
-- Optional query parameters:
-  - `page`: Page number
-  - `page_size`: Number of items per page (max 100)
-  - `author`: Filter by author username or ID
-  - `search`: Search through title and content
+**Query Parameters:**
+- `page`: Page number (default: 1)
+- `page_size`: Number of articles per page (default: 10, max: 100)
+- `author`: Filter articles by author (username or ID)
+- `search`: Search for articles by title or content
 
-#### Example Requests:
-
+**Example Requests:**
 ```
 GET /api/news/
-
 GET /api/news/?page=2&page_size=20
-
 GET /api/news/?author=johndoe
 GET /api/news/?author=5
-
 GET /api/news/?search=technology
 ```
 
-### 2. Create a New News Article
+**Response Example:**
+```json
+[
+  {
+    "id": 1,
+    "title": "Breaking News",
+    "summary": "Brief summary of the article",
+    "author": {
+      "id": 1,
+      "username": "johndoe"
+    },
+    "tags": [
+      { "id": 1, "name": "Technology" },
+      { "id": 2, "name": "Science" }
+    ],
+    "created_at": "2024-12-07T10:00:00Z"
+  }
+]
+```
 
+---
+
+### 2. **Create a New News Article**
+Create a new news article (requires authentication).
+
+**Endpoint:**
 ```
 POST /api/news/
 ```
 
-- Requires authentication
-- Request Body:
-
+**Request Body:**
 ```json
 {
   "title": "Breaking News Title",
   "content": "Full article content",
-  "summary": "Optional brief summary", // Optional
-  "tags": [1, 2] // Optional 
+  "summary": "Optional brief summary",
+  "tags": [1, 2]
 }
 ```
 
-### 3. Retrieve a Specific News Article
+**Response Example:**
+```json
+{
+  "id": 2,
+  "title": "Breaking News Title",
+  "content": "Full article content",
+  "summary": "Optional brief summary",
+  "tags": [
+    { "id": 1, "name": "Technology" },
+    { "id": 2, "name": "Science" }
+  ],
+  "author": {
+    "id": 1,
+    "username": "admin"
+  },
+  "created_at": "2024-12-07T10:30:00Z"
+}
+```
 
+---
+
+### 3. **Retrieve a Specific News Article**
+Get detailed information about a specific article.
+
+**Endpoint:**
 ```
 GET /api/news/{id}/
 ```
 
-- Returns detailed information about a specific news article
-
-### 4. Update a News Article
-
-```
-PUT/PATCH /api/news/{id}/
-```
-
-- Requires authentication
-- Can update title, content, tags, etc.
-
+**Response Example:**
 ```json
 {
-  "title": "Updated Title",
-  "tags": [1, 3] // Update tags
+  "id": 2,
+  "title": "Breaking News Title",
+  "content": "Full article content",
+  "summary": "Optional brief summary",
+  "tags": [
+    { "id": 1, "name": "Technology" },
+    { "id": 2, "name": "Science" }
+  ],
+  "author": {
+    "id": 1,
+    "username": "admin"
+  },
+  "created_at": "2024-12-07T10:30:00Z",
+  "updated_at": "2024-12-07T11:00:00Z"
 }
 ```
 
-### 5. Delete a News Article
+---
 
+### 4. **Update a News Article**
+Update an existing news article (requires authentication).
+
+**Endpoint:**
+```
+PUT /api/news/{id}/
+```
+
+**Request Body Example:**
+```json
+{
+  "title": "Updated News Title",
+  "tags": [1, 3]
+}
+```
+
+**Response Example:**
+```json
+{
+  "id": 2,
+  "title": "Updated News Title",
+  "content": "Full article content",
+  "summary": "Optional brief summary",
+  "tags": [
+    { "id": 1, "name": "Technology" },
+    { "id": 3, "name": "Business" }
+  ],
+  "author": {
+    "id": 1,
+    "username": "admin"
+  },
+  "created_at": "2024-12-07T10:30:00Z",
+  "updated_at": "2024-12-07T12:00:00Z"
+}
+```
+
+---
+
+### 5. **Delete a News Article**
+Delete a specific article (requires authentication).
+
+**Endpoint:**
 ```
 DELETE /api/news/{id}/
 ```
 
-- Requires authentication
-- Permanently removes the news article
+**Response:**
+```
+204 No Content
+```
+
+---
 
 ## Tags Endpoints
 
-### 1. List All Tags
+### 1. **List All Tags**
+Retrieve a list of all available tags.
 
+**Endpoint:**
 ```
 GET /api/tags/
 ```
 
-- Returns a list of all available tags
+**Response Example:**
+```json
+[
+  { "id": 1, "name": "Technology", "description": "Tech-related news articles" },
+  { "id": 2, "name": "Science", "description": "Science-related news articles" }
+]
+```
 
-### 2. Create a New Tag
+---
 
+### 2. **Create a New Tag**
+Create a new tag (requires authentication).
+
+**Endpoint:**
 ```
 POST /api/tags/
 ```
 
+**Request Body:**
 ```json
 {
   "name": "Technology",
@@ -102,42 +216,67 @@ POST /api/tags/
 }
 ```
 
-### 3. Retrieve a Specific Tag
-
-```
-GET /api/tags/{id}/
-```
-- Response Format
-
+**Response Example:**
 ```json
 {
-  "id": 1,
-  "title": "Article Title",
-  "content": "Article content",
-  "author": {
-    "id": 1,
-    "username": "johndoe"
-  },
-  "tags": [{ "id": 1, "name": "Technology" }],
-  "created_at": "2024-01-01T12:00:00Z",
-  "updated_at": "2024-01-02T14:30:00Z"
+  "id": 3,
+  "name": "Technology",
+  "description": "Tech-related news articles"
 }
 ```
 
-### 4. Update a Tag
+---
 
+### 3. **Retrieve a Specific Tag**
+Retrieve details about a specific tag.
+
+**Endpoint:**
+```
+GET /api/tags/{id}/
+```
+
+**Response Example:**
+```json
+{
+  "id": 1,
+  "name": "Technology",
+  "description": "Tech-related news articles"
+}
+```
+
+---
+
+### 4. **Update a Tag**
+Update details of a specific tag (requires authentication).
+
+**Endpoint:**
 ```
 PUT/PATCH /api/tags/{id}/
 ```
 
+**Request Body Example:**
 ```json
 {
-  "description": "Updated tag description"
+  "description": "Updated description for the tag"
 }
 ```
 
-### 5. Delete a Tag
+---
 
+### 5. **Delete a Tag**
+Delete a specific tag (requires authentication).
+
+**Endpoint:**
 ```
 DELETE /api/tags/{id}/
 ```
+
+**Response:**
+```
+204 No Content
+```
+
+---
+
+## Authentication
+All `POST`, `PUT`, `PATCH`, and `DELETE` endpoints require authentication. Ensure users can only modify resources they own.
